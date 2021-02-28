@@ -577,8 +577,8 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        if (estado == true || estado) {
-            JOptionPane.showMessageDialog(this, "este perro ya esta adoptado");
+        if (estado == true) {
+            JOptionPane.showMessageDialog(this, "este perro ya esta adoptado o no has seleccionado perro");
         } else {
 
             int fila_perro = tablaPerro.getSelectedRow();
@@ -688,7 +688,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     private DefaultTableModel rellenameTablaPerroBuscar(String sql, String parametroBusqueda) {
-        List<Perro> miLista = p.dameBusquedaPerro(sql, txtBuscar.getText());
+        List<Perro> miLista = p.dameBusquedaPerro(sql, parametroBusqueda);
         modeloPerroTabla = (DefaultTableModel) tablaPerro.getModel();
         Object[] o = new Object[6];
         for (int i = 0; i < miLista.size(); i++) {

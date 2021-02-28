@@ -1,124 +1,76 @@
--- phpMyAdmin SQL Dump
--- version 4.8.5
--- https://www.phpmyadmin.net/
---
 
 
-DROP DATABASE IF EXISTS adopcion;
-CREATE DATABASE adopcion;
-USE adopcion;
-SET FOREIGN_KEY_CHECKS=0;
+-- secuencia para id de propietario equivalente a serial en mysql 
+ Create sequence sec_adoptante
+start with 1
+increment by 1
+minvalue 1
+maxvalue 10000;
+/
+-- creo objeto propietario a partir del cual creare la tabla propietario
+CREATE TYPE t_adoptante  AS OBJECT
+(id_adoptante NUMBER,
+nombre VARCHAR2(60),
+apellido_1 VARCHAR2(60),
+APELLIDO_2 VARCHAR2(60),
+direccion VARCHAR2(256),
+ciudad VARCHAR2(60),
+comunidad_autonoma VARCHAR2(60),
+codigo_postal NUMBER(11)
+);
+/
+-- creo tabla propietario
+CREATE TABLE adoptante OF t_adoptante;
+/
+-- creo secuencia para id del perro 
+ Create sequence sec_perro
+start with 1
+increment by 1
+minvalue 1
+maxvalue 10000;
+/
 
+-- creo objeto de tipo perro con los atributos correspondientes
+CREATE TYPE t_perro AS OBJECT 
+(id_perro NUMBER,
+nombre VARCHAR2(60),
+raza VARCHAR2(60),
+fecha_nacimiento NUMBER(4),
+direccion_perrera VARCHAR2(256)
+);
+/
+-- creo tabla perro
+CREATE TABLE perro OF t_perro;
+/
+-- creo secuencia para id de adopcion
+ Create sequence sec_adopcion
+start with 1
+increment by 1
+minvalue 1
+maxvalue 10000;
 
-CREATE TABLE `adopcion` (
-  `id_adopcion` bigint(20) UNSIGNED NOT NULL,
-  `perro_id` bigint(20) UNSIGNED NOT NULL,
-  `adoptante_id` bigint(20) UNSIGNED NOT NULL,
-  `fecha` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+-- creo objeto de tipo adopcion que se relacionara con objetos anteriores 
 
---
--- Volcado de datos para la tabla `adopcion`
---
+CREATE TYPE t_adopcion AS OBJECT 
+(id_adopcion NUMBER,
+perro REF t_perro,
+adoptante REF t_adoptante,
+fecha DATE
+);
+/
+CREATE TABLE adopcion OF t_adopcion;
+/
+-- inserto propietario
+insert into adoptante values(sec_adoptante.nextval,'rocio esperanza','soriano','gomez', 'calle imaginaria 1 portal 3, 2�b', 'madrid','Comunidad de madrid',28067);
+-- inserto perro 
+insert into perro values(sec_perro.nextval, 'perrito', 'chuchus primitivus vulgaris', 2015,'perrera municipal de mostoles');
+--inserto adopcion para perro p conid 41 y adopnte a con id 41
+insert into adopcion values (sec_adopcion.nextval, (SELECT REF(p)from perro p WHERE p.id_perro=41),(SELECT REF(a)FROM adoptante a WHERE a.id_adoptante=41),to_date('28-02-2020','DD-MM-YYYY'));
 
-INSERT INTO `adopcion` (`id_adopcion`, `perro_id`, `adoptante_id`, `fecha`) VALUES
-(9, 5, 5, '2021-02-24 18:13:38'),
-(10, 4, 5, '2021-02-24 18:32:48'),
-(11, 2, 1, '2021-02-24 18:42:50');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `adoptante`
---
-
-CREATE TABLE `adoptante` (
-  `id_adoptante` bigint(20) UNSIGNED NOT NULL,
-  `nombre` varchar(50) NOT NULL,
-  `apellido_1` varchar(50) NOT NULL,
-  `apellido_2` varchar(50) NOT NULL,
-  `direccion` varchar(256) NOT NULL,
-  `ciudad` varchar(50) NOT NULL,
-  `comunidad_autonoma` varchar(128) NOT NULL,
-  `codigo_postal` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-
-CREATE TABLE `perro` (
-  `id_perro` bigint(20) UNSIGNED NOT NULL,
-  `nombre` varchar(20) NOT NULL,
-  `raza` varchar(256) NOT NULL,
-  `anno_nacimiento` year(4) NOT NULL,
-  `direccion_perrera` varchar(256) NOT NULL,
-  `estado` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-
-ALTER TABLE `adopcion`
-  ADD PRIMARY KEY (`id_adopcion`),
-  ADD UNIQUE KEY `id_adopcion` (`id_adopcion`),
-  ADD KEY `perro_id` (`perro_id`),
-  ADD KEY `adoptante_id` (`adoptante_id`);
-
---
--- Indices de la tabla `adoptante`
---
-ALTER TABLE `adoptante`
-  ADD PRIMARY KEY (`id_adoptante`),
-  ADD UNIQUE KEY `id_adoptante` (`id_adoptante`);
-
---
--- Indices de la tabla `perro`
---
-ALTER TABLE `perro`
-  ADD PRIMARY KEY (`id_perro`),
-  ADD UNIQUE KEY `id_perro` (`id_perro`);
-
---
--- AUTO_INCREMENT de las tablas volcadas
---
-
---
--- AUTO_INCREMENT de la tabla `adopcion`
---
-ALTER TABLE `adopcion`
-  MODIFY `id_adopcion` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
--- AUTO_INCREMENT de la tabla `adoptante`
---
-ALTER TABLE `adoptante`
-  MODIFY `id_adoptante` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT de la tabla `perro`
---
-ALTER TABLE `perro`
-  MODIFY `id_perro` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- Restricciones para tablas volcadas
---
-
---
--- Filtros para la tabla `adopcion`
---
-ALTER TABLE `adopcion`
-  ADD CONSTRAINT `adopcion_ibfk_1` FOREIGN KEY (`perro_id`) REFERENCES `perro` (`id_perro`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `adopcion_ibfk_2` FOREIGN KEY (`adoptante_id`) REFERENCES `adoptante` (`id_adoptante`) ON UPDATE CASCADE;
-
-INSERT INTO `perro` (`id_perro`, `nombre`, `raza`, `anno_nacimiento`, `direccion_perrera`, `estado`) VALUES
-(1, 'tobby', 'perro de agua', 2015, 'Calle imaginaria 6', 0),
-(2, 'kira', 'dogo aleman', 2019, 'calle de desengaño 13', 0),
-(4, 'Oso', 'mestizo', 2020, 'Perrera municipal de mostoles', 0),
-(5, 'gorda', 'boxer', 2015, 'perrera de alcorcon', 0),
-(6, 'lolo', 'doberman', 2016, 'Perrera municipal de madrid', 0);
-
-INSERT INTO `adoptante` (`id_adoptante`, `nombre`, `apellido_1`, `apellido_2`, `direccion`, `ciudad`, `comunidad_autonoma`, `codigo_postal`) VALUES
-(1, 'Rocio Esperanza', 'Soriano', 'Gomez', 'Calle desconocida 35, portal 3, 2b IZQUIERDA', 'Madrid', 'Comunidad de Madrid', 28026),
-(3, 'Juan Maria', 'Diego', 'Mayor', 'calle ac/dc ,34,1b, escalera derecha', 'Barcelona', 'Cataluña', 36089),
-(4, 'Juan Jose', 'Garcia', 'Garcia', 'plaza de españa 1 34', 'Madrid', 'Comunidad de Madrid', 28056),
-(5, 'Carmen', 'profesora ', 'UFV', 'pozuleo de alracon detras', 'Madrid', 'Comunidad de Madrid', 28056);
-
-
-
+/
+select a.id_adopcion, a.adoptante.nombre, a.adoptante.apellido_1,a.adoptante.apellido_2, a.perro.nombre from adopcion a;
+/
+select *from perro p;
+/
+select *from adoptante;
+/
